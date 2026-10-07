@@ -17,6 +17,8 @@ jobs:
         run: python -m pytest
       - name: construire l'image
         run: docker build -t cloudforge-demo:local .
+      - name: Afficher les paquets de l image
+        run: docker run --rm cloudforge-demo:local python -m pip list
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
