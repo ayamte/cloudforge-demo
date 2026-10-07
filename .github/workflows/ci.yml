@@ -17,3 +17,14 @@ jobs:
         run: python -m pytest
       - name: construire l'image
         run: docker build -t cloudforge-demo:local .
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          scan-type: 'image'
+          image-ref: 'cloudforge-demo:local'
+          format: 'table'
+          scanners: 'vuln'
+          exit-code: '0'
+          ignore-unfixed: false
+          vuln-type: 'os,library'
+          severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
