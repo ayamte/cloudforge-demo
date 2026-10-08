@@ -23,8 +23,15 @@ jobs:
           scan-type: 'image'
           image-ref: 'cloudforge-demo:local'
           format: 'json'
+          output: 'trivy-report.json'
           scanners: 'vuln'
           exit-code: '0'
           ignore-unfixed: false
           vuln-type: 'os,library'
           severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
+      - name: Publier le rapport Trivy
+        uses: actions/upload-artifact@v7
+        with:
+          name: trivy-report
+          path: trivy-report.json
+          if-no-files-found: error
