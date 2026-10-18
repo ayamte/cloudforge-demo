@@ -1,5 +1,11 @@
 name: CloudForge CI
-on: pull_request
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+permissions:
+  contents: read
 
 jobs:
   tests:
@@ -35,3 +41,33 @@ jobs:
           name: trivy-report
           path: trivy-report.json
           if-no-files-found: error
+  publish:
+    needs: tests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: read
+      id-token: write
+
+    env:
+      IMAGE: acrcloudforgeproject26.azurecr.io/cloudforge-demo
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v7
+
+      - name: Connexion Azure avec OIDC
+        uses: azure/login@v3
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Connexion au registre ACR
+        run: az acr login --name acrcloudforgeproject26
+
+      - name: Construire et publier l image
+        run: |
+          docker build -t "$IMAGE:$GITHUB_SHA" .
+          docker push "$IMAGE:$GITHUB_SHA"
